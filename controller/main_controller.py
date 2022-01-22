@@ -28,7 +28,7 @@ class Main_Controller:
         self.child_controller["file_picker"] = File_Picker_Controller(self)
 
     def finished_image_selection(self, image_paths_model: Image_Paths_Model):
-        self.images_model.images_data += image_paths_model.getImages()
+        self.images_model.image_models += image_paths_model.getImages()
         controller: File_Picker_Controller = cast(
             File_Picker_Controller, self.child_controller["file_picker"]
         )
