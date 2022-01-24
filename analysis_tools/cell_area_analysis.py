@@ -1,6 +1,5 @@
 from typing import List
 
-import matplotlib.pyplot as plt
 import numpy as np
 import skimage.color as color
 import skimage.filters as filters
@@ -64,7 +63,7 @@ class Cell_Area_Analysis:
             img[img != max_label] = 0
             working_images_data[i] = img
 
-        #Color label original image data
+        # Color label original image data
         annotated_images_data = tuple(
             color.label2rgb(working_images_data[i], image_models[i].image_data)
             for i in range(len(working_images_data))

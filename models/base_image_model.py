@@ -23,7 +23,9 @@ class Base_Image_Model:
 
     @property
     def image_description(self) -> str:
-        return f"{self.image_name} (Slice {self.slice_index} of {self.total_slice_count})"
+        return (
+            f"{self.image_name} (Slice {self.slice_index} of {self.total_slice_count})"
+        )
 
 
 class Result_Image_Model:

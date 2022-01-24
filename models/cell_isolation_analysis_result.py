@@ -1,9 +1,9 @@
 import numpy as np
+import pandas as pd
 
 from models.abstract_analysis_result import Analysis_Result
-from models.abstract_identifiable_image import Identifiable_Image
-from models.base_image_model import Base_Image_Model, Result_Image_Model
-import pandas as pd
+from models.base_image_model import Result_Image_Model
+
 
 class Cell_Isolation_Analysis_Result(Analysis_Result):
     def __init__(

@@ -1,8 +1,6 @@
 import tkinter as UI
 from tkinter.constants import BOTH, NW, YES, S
-from typing import Optional
 
-import config as cfg
 from analysis_tools.analysis_option import Analysis_Option
 from models.images_model import Images_Model
 

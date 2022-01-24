@@ -6,8 +6,10 @@ from models.images_model import Images_Model
 from views.main_view import Main_View
 
 from controller.abstract_controller import Controller_Protocol
+from controller.analysis_settings_view_controller import (
+    Analysis_Settings_View_Controller,
+)
 from controller.file_picker_controller import File_Picker_Controller
-from controller.analysis_settings_view_controller import Analysis_Settings_View_Controller
 
 
 class Main_Controller:
@@ -29,8 +31,10 @@ class Main_Controller:
 
     def finished_image_selection(self, image_paths_model: Image_Paths_Model):
         self.images_model.image_models += image_paths_model.get_image_models()
-        self.images_model.image_index.max_index = len(self.images_model.image_models) - 1 
-        
+        self.images_model.image_index.max_index = (
+            len(self.images_model.image_models) - 1
+        )
+
         controller: File_Picker_Controller = cast(
             File_Picker_Controller, self.child_controller["file_picker"]
         )

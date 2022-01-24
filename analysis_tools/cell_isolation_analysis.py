@@ -4,8 +4,7 @@ import skimage.color as color
 import skimage.filters as filters
 import skimage.measure as measure
 from models.base_image_model import Base_Image_Model, Result_Image_Model
-from models.cell_isolation_analysis_result import \
-    Cell_Isolation_Analysis_Result
+from models.cell_isolation_analysis_result import Cell_Isolation_Analysis_Result
 from scipy.ndimage.morphology import binary_fill_holes
 
 
@@ -57,9 +56,9 @@ class Cell_Isolation_Analysis:
         )
 
         binary_image_data = working_image_data >= 1
-        
+
         pixel_area = np.count_nonzero(binary_image_data == 1)
-        
+
         pd.DataFrame(
             [pixel_area],
             index=[image_model.image_description],

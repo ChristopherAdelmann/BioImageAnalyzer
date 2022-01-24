@@ -1,7 +1,6 @@
 import tkinter as UI
 from abc import abstractmethod
 from tkinter.constants import BOTH, YES
-from typing import Optional
 
 
 class View(UI.Frame):

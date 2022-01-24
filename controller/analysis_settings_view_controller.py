@@ -1,4 +1,4 @@
-from tkinter import IntVar, Variable, filedialog
+from tkinter import IntVar, filedialog
 
 import config as cfg
 import matplotlib.pyplot as plt

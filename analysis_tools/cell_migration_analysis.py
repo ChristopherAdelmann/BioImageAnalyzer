@@ -5,7 +5,6 @@ from typing import List, Tuple, cast
 import cv2
 import matplotlib.pyplot as plt
 import pandas as pd
-from matplotlib_interface.multipage_image_fig import Multipage_Image_Fig
 from models.base_image_model import Result_Image_Model
 from models.cell_isolation_analysis_result import Cell_Isolation_Analysis_Result
 from models.cell_migration_analysis_result import Cell_Migration_Analysis_Result
