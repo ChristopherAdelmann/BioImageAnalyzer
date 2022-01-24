@@ -7,7 +7,7 @@ from views.main_view import Main_View
 
 from controller.abstract_controller import Controller_Protocol
 from controller.file_picker_controller import File_Picker_Controller
-from controller.image_view_controller import Image_View_Controller
+from controller.analysis_settings_view_controller import Analysis_Settings_View_Controller
 
 
 class Main_Controller:
@@ -28,7 +28,9 @@ class Main_Controller:
         self.child_controller["file_picker"] = File_Picker_Controller(self)
 
     def finished_image_selection(self, image_paths_model: Image_Paths_Model):
-        self.images_model.image_models += image_paths_model.getImages()
+        self.images_model.image_models += image_paths_model.get_image_models()
+        self.images_model.image_index.max_index = len(self.images_model.image_models) - 1 
+        
         controller: File_Picker_Controller = cast(
             File_Picker_Controller, self.child_controller["file_picker"]
         )
@@ -40,6 +42,6 @@ class Main_Controller:
         window_height = round(self.view.winfo_screenheight() / 2)
         window_width = round(self.view.winfo_screenwidth() / 2)
         self.resize_window((window_width, window_height))
-        self.child_controller["image_view"] = Image_View_Controller(
+        self.child_controller["image_view"] = Analysis_Settings_View_Controller(
             self, self.images_model
         )

@@ -6,7 +6,7 @@ class App():
 
     def __init__(self):
         self.root = UI.Tk()
-        self.root.title("Spheroid Image Analyzer")
+        self.root.title("Bio Image Analyzer")
 
         screen_width: int = self.root.winfo_screenwidth()
         screen_height: int = self.root.winfo_screenheight()

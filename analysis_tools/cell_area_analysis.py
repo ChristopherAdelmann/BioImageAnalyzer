@@ -5,15 +5,13 @@ import numpy as np
 import skimage.color as color
 import skimage.filters as filters
 import skimage.measure as measure
-from PIL import Image
+from models.base_image_model import Base_Image_Model
 from scipy.ndimage.morphology import binary_fill_holes
-
-from models.image_model import Image_Model
 
 
 class Cell_Area_Analysis:
     @staticmethod
-    def calculate(image_models: List[Image_Model]):
+    def calculate(image_models: List[Base_Image_Model]):
 
         working_images_data: List[np.ndarray] = []
 
@@ -51,7 +49,9 @@ class Cell_Area_Analysis:
         working_images_data = list(measure.label(img) for img in working_images_data)
 
         # Get bin counts and calculate max size labels
-        images_bin_counts = tuple(np.bincount(labels) for labels in working_images_data)
+        images_bin_counts = tuple(
+            np.bincount(labels.flatten()) for labels in working_images_data
+        )
         images_max_label = tuple(
             np.delete(bin_counts, 0).argmax() + 1 for bin_counts in images_bin_counts
         )
@@ -64,19 +64,20 @@ class Cell_Area_Analysis:
             img[img != max_label] = 0
             working_images_data[i] = img
 
+        #Color label original image data
         annotated_images_data = tuple(
             color.label2rgb(working_images_data[i], image_models[i].image_data)
             for i in range(len(working_images_data))
         )
 
-        fig, ax = plt.subplots()
+        # fig, ax = plt.subplots()
 
-        ax.imshow(annotated_images_data[0])
+        # ax.imshow(annotated_images_data[0])
 
 
-path = "/Volumes/NO NAME/raw data/VID665_D3_1_03d08h00m.tif"
-test_images_model = [Image_Model(path)]
+# path = "/Volumes/NO NAME/raw data/VID665_D3_1_03d08h00m.tif"
+# test_images_model = [Base_Image_Model(path)]
 
-Cell_Area_Analysis.calculate(test_images_model)
+# Cell_Area_Analysis.calculate(test_images_model)
 
-plt.show()
+# plt.show()
