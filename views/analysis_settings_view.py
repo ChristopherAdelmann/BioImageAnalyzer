@@ -62,5 +62,6 @@ class Analysis_Settings_View(View):
         
     def create_progress_bar(self):
         self.progress_bar = ttk.Progressbar(self, orient=HORIZONTAL, length= 300, mode="indeterminate")
-        self.progress_bar.pack(pady=20)
-        self.progress_bar.start()
+        self.progress_bar.pack(pady=20, padx=20, expand=True, fill=BOTH) 
+        self.progress_bar.start(5)
+        

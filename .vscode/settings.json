@@ -2,6 +2,7 @@
     "editor.formatOnSave": true,
     "editor.formatOnPaste": true,
     "python.formatting.provider": "black",
+    "python.languageServer": "Pylance",
     "editor.codeActionsOnSave": {
         "source.organizeImports": true
     }

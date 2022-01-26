@@ -78,8 +78,6 @@ class Cell_Migration_Analysis(Analysis_Method):
             map(lambda res: res.image_uuid, isolated_cell_result.result_image_models)
         )
 
-        print("Number of result image models:", len(result_image_models))
-
         base_image_names = tuple(
             map(
                 lambda res: res.image_description,
@@ -95,11 +93,9 @@ class Cell_Migration_Analysis(Analysis_Method):
 
         result_df["Migration Distance [px]"] = distances_to_prev_centroid
 
-        result_df["Centroid [idx_y, idx_x]"] = tuple(
-            map(lambda props: props.centroid, props_for_results)
-        )
+        result_df["Centroid [idx_y, idx_x]"] = tuple(props.centroid for props in props_for_results)
 
-        result_df["Area [px]"] = tuple(map(lambda props: props.area, props_for_results))
+        result_df["Area [px]"] = tuple(props.area for props in props_for_results)
 
         return Cell_Migration_Analysis_Result(result_df, result_image_models)
 

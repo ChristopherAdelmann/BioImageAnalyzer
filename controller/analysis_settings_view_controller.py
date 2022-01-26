@@ -1,24 +1,27 @@
 import threading
-import concurrent.futures as futures
 from tkinter import IntVar, filedialog
-from typing import cast
+from typing import Type, cast, List
 
 import config as cfg
 import matplotlib.pyplot as plt
+from analysis_tools.abstract_analysis_method import Analysis_Method
 from analysis_tools.analysis_option import Analysis_Option
-from analysis_tools.cell_isolation_analysis import Cell_Isolation_Analysis
-from analysis_tools.cell_migration_analysis import Cell_Migration_Analysis
 from matplotlib_interface.multipage_image_fig import Multipage_Image_Fig
 from models.analysis_results.abstract_analysis_result import Analysis_Result_Protocol
-from models.analysis_results.cell_isolation_analysis_result import Cell_Isolation_Analysis_Result
-from models.analysis_results.cell_migration_analysis_result import Cell_Migration_Analysis_Result
+from models.analysis_results.cell_isolation_analysis_result import (
+    Cell_Isolation_Analysis_Result,
+)
+from models.analysis_results.cell_migration_analysis_result import (
+    Cell_Migration_Analysis_Result,
+)
+from models.analysis_task import Analysis_Task
 from models.image.images_model import Images_Model
 from views.analysis_settings_view import Analysis_Settings_View
 
 from controller.abstract_controller import Main_Controller_Protocol
-from models.analysis_task import Analysis_Task
 
-class Analysis_Settings_View_Controller():
+
+class Analysis_Settings_View_Controller:
     def __init__(
         self, parent_controller: Main_Controller_Protocol, images_model: Images_Model
     ):
@@ -91,27 +94,26 @@ class Analysis_Settings_View_Controller():
         """Starts the asynchronous image data analysis with the selected parameters"""
         self.output_dir_path = filedialog.askdirectory(title="Output directory")
         self.view.update()
-        if (
-            Analysis_Option(self.cell_migration_analysis_enabled.get())
-            == Analysis_Option.cell_migration
-        ):
-            # self.executor = futures.ProcessPoolExecutor()
 
-            # future = self.executor.submit(self.compute_cell_migration)
-            # future.add_done_callback(self.process_analysis_results)
-            self.analysis_task = Analysis_Task(self.view, self.present_results, self.images_model.image_models)
-            self.analysis_task.add_analysis_method(Cell_Migration_Analysis)
-            self.analysis_task.run_analysis()
-            
-            for child in self.view.winfo_children():
-                child.destroy()
+        self.analysis_task = Analysis_Task(
+            self.view, self.present_results, self.images_model.image_models
+        )
 
-            self.view.create_progress_bar()
+        analysis_method = Analysis_Option(
+            self.cell_migration_analysis_enabled.get()
+        ).analysis_method()
+        try:
+            analysis_method = cast(Type[Analysis_Method], analysis_method)
+            self.analysis_task.add_analysis_method(analysis_method)
+        except:
+            print("Is not a analysis method")
 
-            # self.parent_controller.view.after(200, self.present_results)
+        self.analysis_task.run_analysis()
 
-    def compute_cell_migration(self) -> Cell_Migration_Analysis_Result:        
-        return Cell_Migration_Analysis.calculate(self.images_model.image_models)
+        for child in self.view.winfo_children():
+            child.destroy()
+
+        self.view.create_progress_bar()
 
     def process_analysis_results(self, future_analysis_result):
         """Callback function for the analysis result future completion
@@ -125,20 +127,18 @@ class Analysis_Settings_View_Controller():
             f"{self.output_dir_path}/cell_migration_analysis.xlsx"
         )
 
-    def present_results(self):
+    def present_results(self, results: List[Analysis_Result_Protocol]):
         try:
-            migration_analysis_result = cast(
-                Cell_Migration_Analysis_Result, self.analysis_result
-            )
+            
             migration_fig = Multipage_Image_Fig(
-                migration_analysis_result.result_image_models
+                results[0].result_image_models
             )
             migration_fig.setup()
             plt.show()
-            
+
             for child in self.view.winfo_children():
                 child.destroy()
-                
+
             self.analysis_result = None
             self.view.create_view(self.images_model)
             self.setup_actions()
