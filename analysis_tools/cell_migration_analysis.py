@@ -1,35 +1,48 @@
+import copy
 import math
 from types import NoneType
 from typing import List, Tuple, cast
 
 import cv2
-import matplotlib.pyplot as plt
 import pandas as pd
-from models.base_image_model import Result_Image_Model
-from models.cell_isolation_analysis_result import Cell_Isolation_Analysis_Result
-from models.cell_migration_analysis_result import Cell_Migration_Analysis_Result
+from .cell_isolation_analysis import Cell_Isolation_Analysis
+from models.analysis_results.cell_migration_analysis_result import Cell_Migration_Analysis_Result
+from models.image.image_model import Image_Model
 from skimage.measure import regionprops
 
+from .abstract_analysis_method import Analysis_Method
 
-class Cell_Migration_Analysis:
+
+class Cell_Migration_Analysis(Analysis_Method):
     @staticmethod
-    def calculate(
-        isolated_cell_results: List[Cell_Isolation_Analysis_Result],
-    ) -> Cell_Migration_Analysis_Result:
+    def calculate(image_models: List[Image_Model]) -> Cell_Migration_Analysis_Result:
+        """Analysing the output auf a cell isolation analysis for the migration of the largest connected component
 
+        Args:
+            isolated_cell_results (List[Cell_Isolation_Analysis_Result]): The result of a previous cell isolation analysis
+
+        Returns:
+            Cell_Migration_Analysis_Result: The finished analysis result
+        """
+
+        isolated_cell_result = Cell_Isolation_Analysis.calculate(image_models)
+        
+        # Extracting the props of the largest connected component over all isolated cell results
         props_for_results = tuple(
-            regionprops(res.labeled_image_data)[0] for res in isolated_cell_results
+            regionprops(res.image_data)[0]
+            for res in isolated_cell_result.labeled_image_models
         )
         distances_to_prev_centroid: List[float | None] = [None]
         migration_lines_points: List[Cell_Migration_Analysis.Line_Points | None] = [
             None
         ]
-        result_image_models: List[Result_Image_Model] = [
-            Result_Image_Model.copy_base_image_model(
-                isolated_cell_results[0].result_image_model
-            )
+
+        # Preparing the result image model for the first image without draw
+        result_image_models: List[Image_Model] = [
+            copy.copy(isolated_cell_result.result_image_models[0])
         ]
 
+        # Iterate over all centroids and calculate traveled distance to previous centroid
         for i in range(1, len(props_for_results)):
             prev_centroid: Tuple[float, float] = props_for_results[i - 1].centroid
             curr_centroid: Tuple[float, float] = props_for_results[i].centroid
@@ -42,13 +55,13 @@ class Cell_Migration_Analysis:
             migration_lines_points.append(
                 Cell_Migration_Analysis.Line_Points(line_start_coord, line_end_coord)
             )
-            curr_image_model = isolated_cell_results[i].result_image_model
+
+            # Drawing the previous path on each frame
+            curr_image_model = isolated_cell_result.result_image_models[i]
 
             for j in range(0, i + 1):
-                print("Image Loop:", i)
                 line_points = migration_lines_points[j]
                 if type(line_points) != NoneType:
-                    print("Image Line:", i, j)
                     line_points = cast(Cell_Migration_Analysis.Line_Points, line_points)
                     cv2.line(
                         curr_image_model.image_data,
@@ -60,14 +73,17 @@ class Cell_Migration_Analysis:
 
             result_image_models.append(curr_image_model)
 
+        # Write dataframe with
         index_names = tuple(
-            map(lambda res: res.result_image_model.image_uuid, isolated_cell_results)
+            map(lambda res: res.image_uuid, isolated_cell_result.result_image_models)
         )
+
+        print("Number of result image models:", len(result_image_models))
 
         base_image_names = tuple(
             map(
-                lambda res: res.result_image_model.image_description,
-                isolated_cell_results,
+                lambda res: res.image_description,
+                isolated_cell_result.result_image_models,
             )
         )
 

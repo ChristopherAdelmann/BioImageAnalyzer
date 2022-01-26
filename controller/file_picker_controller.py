@@ -1,13 +1,13 @@
 from tkinter import filedialog
 from typing import cast
 
-from models.image_paths_model import Image_Paths_Model
+from models.image.image_paths_model import Image_Paths_Model
 from views.file_picker_view import File_Picker_View
 
-from controller.abstract_controller import Main_Controller_Protocol
+from controller.abstract_controller import Controller_Protocol, Main_Controller_Protocol
 
 
-class File_Picker_Controller:
+class File_Picker_Controller(Controller_Protocol):
     def __init__(self, parent_controller: Main_Controller_Protocol):
         self.parent_controller: Main_Controller_Protocol = parent_controller
         self.model: Image_Paths_Model = Image_Paths_Model()

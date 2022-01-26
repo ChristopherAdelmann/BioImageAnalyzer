@@ -3,7 +3,7 @@ from typing import List
 import numpy as np
 from PIL import Image
 
-from models.base_image_model import Base_Image_Model
+from .image_model import Image_Model
 
 
 class Image_Paths_Model(object):
@@ -13,24 +13,22 @@ class Image_Paths_Model(object):
     def add_paths(self, new_paths: tuple[str]) -> None:
         self.paths += new_paths
 
-    def get_image_models(self) -> List[Base_Image_Model]:
-        image_models: List[Base_Image_Model] = []
+    def get_image_models(self) -> List[Image_Model]:
+        image_models: List[Image_Model] = []
         for path in self.paths:
             sub_image_models = self.create_image_models(path)
             image_models += sub_image_models
 
         return image_models
 
-    def create_image_models(self, path: str) -> List[Base_Image_Model]:
+    def create_image_models(self, path: str) -> List[Image_Model]:
         image = Image.open(path)
 
         shape = np.array(image).shape
 
         image_slices = image.n_frames
 
-        print("Image_Slices with shape:", image_slices, shape)
-
-        image_models: List[Base_Image_Model] = []
+        image_models: List[Image_Model] = []
 
         for i in range(image_slices):
             image.seek(i)
@@ -41,6 +39,6 @@ class Image_Paths_Model(object):
                     image_models[i - 1].total_slice_count = 1
                     break
 
-            image_models.append(Base_Image_Model(path, image_data, i + 1, image_slices))
+            image_models.append(Image_Model(path, image_data, i + 1, image_slices))
 
         return image_models

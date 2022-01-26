@@ -1,8 +1,9 @@
 import tkinter as UI
-from tkinter.constants import BOTH, NW, YES, S
+from tkinter import ttk
+from tkinter.constants import BOTH, HORIZONTAL, NW, YES, S
 
 from analysis_tools.analysis_option import Analysis_Option
-from models.images_model import Images_Model
+from models.image.images_model import Images_Model
 
 from views.abstract_view import View
 
@@ -57,3 +58,9 @@ class Analysis_Settings_View(View):
 
         self.run_analysis_button = UI.Button(self.settings_frame, text="Analyze")
         self.run_analysis_button.grid(column=0, row=3, columnspan=2, sticky="nsew")
+
+        
+    def create_progress_bar(self):
+        self.progress_bar = ttk.Progressbar(self, orient=HORIZONTAL, length= 300, mode="indeterminate")
+        self.progress_bar.pack(pady=20)
+        self.progress_bar.start()

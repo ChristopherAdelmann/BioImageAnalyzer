@@ -4,16 +4,16 @@ import numpy as np
 from PIL import Image, ImageTk
 from skimage import exposure, img_as_ubyte
 
-from models.base_image_model import Base_Image_Model
-from models.image_index import Image_Index
+from .image_model import Image_Model
+from .image_index import Image_Index
 
 
 class Images_Model(object):
-    def __init__(self, image_models: List[Base_Image_Model] = []) -> None:
-        self.image_models: List[Base_Image_Model] = image_models
+    def __init__(self, image_models: List[Image_Model] = []) -> None:
+        self.image_models: List[Image_Model] = image_models
         self.image_index = Image_Index(len(image_models) - 1)
         
-    def selected_image_model(self) -> Base_Image_Model:
+    def selected_image_model(self) -> Image_Model:
         return self.image_models[self.image_index.index]
     
     @property

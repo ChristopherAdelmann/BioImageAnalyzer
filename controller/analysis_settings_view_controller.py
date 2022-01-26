@@ -1,4 +1,7 @@
+import threading
+import concurrent.futures as futures
 from tkinter import IntVar, filedialog
+from typing import cast
 
 import config as cfg
 import matplotlib.pyplot as plt
@@ -6,21 +9,31 @@ from analysis_tools.analysis_option import Analysis_Option
 from analysis_tools.cell_isolation_analysis import Cell_Isolation_Analysis
 from analysis_tools.cell_migration_analysis import Cell_Migration_Analysis
 from matplotlib_interface.multipage_image_fig import Multipage_Image_Fig
-from models.images_model import Images_Model
+from models.analysis_results.abstract_analysis_result import Analysis_Result_Protocol
+from models.analysis_results.cell_isolation_analysis_result import Cell_Isolation_Analysis_Result
+from models.analysis_results.cell_migration_analysis_result import Cell_Migration_Analysis_Result
+from models.image.images_model import Images_Model
 from views.analysis_settings_view import Analysis_Settings_View
 
 from controller.abstract_controller import Main_Controller_Protocol
+from models.analysis_task import Analysis_Task
 
-
-class Analysis_Settings_View_Controller:
+class Analysis_Settings_View_Controller():
     def __init__(
         self, parent_controller: Main_Controller_Protocol, images_model: Images_Model
     ):
+        """Controls the Analysis_Settings_View
+
+        Args:
+            parent_controller (Main_Controller_Protocol): The Main_Controller holding the GUI
+            images_model (Images_Model): The model holding image data for later analysis
+        """
         self.parent_controller: Main_Controller_Protocol = parent_controller
         self.images_model: Images_Model = images_model
         self.view: Analysis_Settings_View = Analysis_Settings_View(
             parent_controller.view, images_model
         )
+
         self.preview_image_size = (cfg.window_width, cfg.window_height)
         self.current_image = images_model.selected_image_as_ui_image(
             self.preview_image_size
@@ -29,6 +42,8 @@ class Analysis_Settings_View_Controller:
         self.cell_migration_analysis_enabled: IntVar = IntVar(
             self.view, value=Analysis_Option.none.value
         )
+
+        self.analysis_result: Cell_Migration_Analysis_Result | None = None
 
         self.setup_actions()
 
@@ -44,33 +59,6 @@ class Analysis_Settings_View_Controller:
             variable=self.cell_migration_analysis_enabled
         )
         self.view.run_analysis_button.configure(command=self.run_analysis)
-
-    def run_analysis(self):
-        output_dir_path = filedialog.askdirectory(title="Output directory")
-        print(self.cell_migration_analysis_enabled.get())
-        self.view.update()
-        if (
-            Analysis_Option(self.cell_migration_analysis_enabled.get())
-            == Analysis_Option.cell_migration
-        ):
-            cell_isolation_results = list(
-                Cell_Isolation_Analysis.calculate(img)
-                for img in self.images_model.image_models
-            )
-            cell_migration_result = Cell_Migration_Analysis.calculate(
-                cell_isolation_results
-            )
-
-            cell_migration_result.result_df.to_excel(
-                f"{output_dir_path}/cell_migration_analysis.xlsx"
-            )
-
-            migration_fig = Multipage_Image_Fig(
-                cell_migration_result.result_image_models
-            )
-            migration_fig.setup()
-
-        plt.show()
 
     def preview_next(self):
         self.images_model.image_index.next()
@@ -98,3 +86,61 @@ class Analysis_Settings_View_Controller:
             self.preview_image_size
         )
         self.view.image_canvas.create_image(0, 0, image=self.current_image, anchor="nw")
+
+    def run_analysis(self):
+        """Starts the asynchronous image data analysis with the selected parameters"""
+        self.output_dir_path = filedialog.askdirectory(title="Output directory")
+        self.view.update()
+        if (
+            Analysis_Option(self.cell_migration_analysis_enabled.get())
+            == Analysis_Option.cell_migration
+        ):
+            # self.executor = futures.ProcessPoolExecutor()
+
+            # future = self.executor.submit(self.compute_cell_migration)
+            # future.add_done_callback(self.process_analysis_results)
+            self.analysis_task = Analysis_Task(self.view, self.present_results, self.images_model.image_models)
+            self.analysis_task.add_analysis_method(Cell_Migration_Analysis)
+            self.analysis_task.run_analysis()
+            
+            for child in self.view.winfo_children():
+                child.destroy()
+
+            self.view.create_progress_bar()
+
+            # self.parent_controller.view.after(200, self.present_results)
+
+    def compute_cell_migration(self) -> Cell_Migration_Analysis_Result:        
+        return Cell_Migration_Analysis.calculate(self.images_model.image_models)
+
+    def process_analysis_results(self, future_analysis_result):
+        """Callback function for the analysis result future completion
+
+        Args:
+            future_analysis_result (Future[Cell_Migration_Analysis_Result]): The completed future containing the analysis result
+        """
+        assert threading.current_thread() is threading.main_thread()
+        self.analysis_result = future_analysis_result.result()
+        self.analysis_result.result_df.to_excel(
+            f"{self.output_dir_path}/cell_migration_analysis.xlsx"
+        )
+
+    def present_results(self):
+        try:
+            migration_analysis_result = cast(
+                Cell_Migration_Analysis_Result, self.analysis_result
+            )
+            migration_fig = Multipage_Image_Fig(
+                migration_analysis_result.result_image_models
+            )
+            migration_fig.setup()
+            plt.show()
+            
+            for child in self.view.winfo_children():
+                child.destroy()
+                
+            self.analysis_result = None
+            self.view.create_view(self.images_model)
+            self.setup_actions()
+        except:
+            self.parent_controller.view.after(200, self.present_results)
