@@ -10,6 +10,17 @@
             "request": "launch",
             "program": "/Users/christopher/Documents/PythonDevelopment/SpheroidImageAnalyzer/Bio Image Analyzer.py",
             "console": "integratedTerminal"
+        },
+        {
+            "name": "Profile App",
+            "type": "python",
+            "request": "launch",
+            "module": "cProfile",
+            "args": [
+                "-o",
+                "/tmp/tmp.prof",
+                "/Users/christopher/Documents/PythonDevelopment/SpheroidImageAnalyzer/Bio Image Analyzer.py"
+            ]
         }
     ]
 }

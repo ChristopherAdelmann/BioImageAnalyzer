@@ -8,6 +8,8 @@ from controller.abstract_controller import Controller_Protocol, Main_Controller_
 
 
 class File_Picker_Controller(Controller_Protocol):
+    """Conroller for the File Picker View. Init on app start from main controller."""
+
     def __init__(self, parent_controller: Main_Controller_Protocol):
         self.parent_controller: Main_Controller_Protocol = parent_controller
         self.model: Image_Paths_Model = Image_Paths_Model()

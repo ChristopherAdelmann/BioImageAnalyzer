@@ -3,7 +3,7 @@ import uuid
 
 import numpy as np
 
-from .abstract_identifiable_image import Identifiable_Image_Protocol
+from .abstract_identifiable_image import Identifiable_Image_Model_Protocol
 
 
 class Image_Model:

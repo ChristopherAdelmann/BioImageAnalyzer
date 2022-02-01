@@ -8,7 +8,7 @@ from .image_model import Image_Model
 from .image_index import Image_Index
 
 
-class Images_Model(object):
+class Analysis_Images_Model(object):
     def __init__(self, image_models: List[Image_Model] = []) -> None:
         self.image_models: List[Image_Model] = image_models
         self.image_index = Image_Index(len(image_models) - 1)

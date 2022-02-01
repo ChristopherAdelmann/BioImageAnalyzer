@@ -21,10 +21,9 @@ class Image_Paths_Model(object):
 
         return image_models
 
-    def create_image_models(self, path: str) -> List[Image_Model]:
+    @staticmethod
+    def create_image_models(path: str) -> List[Image_Model]:
         image = Image.open(path)
-
-        shape = np.array(image).shape
 
         image_slices = image.n_frames
 

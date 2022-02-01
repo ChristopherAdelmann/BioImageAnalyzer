@@ -4,7 +4,7 @@ from typing import Protocol
 import numpy as np
 
 
-class Identifiable_Image_Protocol(Protocol):
+class Identifiable_Image_Model_Protocol(Protocol):
     base_image_path: str
     image_data: np.ndarray
     image_name: str

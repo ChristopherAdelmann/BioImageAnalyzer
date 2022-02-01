@@ -3,28 +3,31 @@ from typing import List
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Button
-from models.image.abstract_identifiable_image import Identifiable_Image_Protocol
+from models.image.abstract_identifiable_image import Identifiable_Image_Model_Protocol
 from models.image.image_index import Image_Index
 
 
 class Multipage_Image_Fig(object):
-    def __init__(self, image_models: List[Identifiable_Image_Protocol]):
+    def __init__(self, image_models: List[Identifiable_Image_Model_Protocol], analysis_title: str):
         self.image_models = image_models
         self.page_index = Image_Index(len(image_models) - 1)
+        self.analysis_title = analysis_title
 
     def setup(self):
         self.fig, self.ax = plt.subplots()
         plt.subplots_adjust(bottom=0.2)
 
+        self.fig.canvas.manager.set_window_title(self.analysis_title) 
+        
         self.ax.set_title(self.image_models[self.page_index.index].image_description)
 
         self.aximg = self.ax.imshow(
             self.image_models[self.page_index.index].image_data, cmap="gray"
         )
 
-        axprev = plt.axes([0.7, 0.05, 0.1, 0.05])
-        axnext = plt.axes([0.81, 0.05, 0.1, 0.05])
-        ax_slider = plt.axes([0.12, 0.06, 0.5, 0.0225])
+        axprev = plt.axes((0.7, 0.05, 0.1, 0.05))
+        axnext = plt.axes((0.81, 0.05, 0.1, 0.05))
+        ax_slider = plt.axes((0.12, 0.06, 0.5, 0.0225))
 
         self.bnext = Button(axnext, "Next")
         self.bnext.on_clicked(self.next_image)
@@ -44,7 +47,8 @@ class Multipage_Image_Fig(object):
     def next_image(self, event):
         index = self.page_index.next()
         self.aximg.set_data(self.image_models[index].image_data)
-        self.ax.set_title(self.image_models[self.page_index.index].image_name)
+        self.ax.set_title(self.image_models[self.page_index.index].image_description)
+        self.image_slider.set_val(index + 1)
         self.fig.canvas.flush_events()
         plt.draw()
 
@@ -52,6 +56,7 @@ class Multipage_Image_Fig(object):
         index = self.page_index.prev()
         self.aximg.set_data(self.image_models[index].image_data)
         self.ax.set_title(self.image_models[self.page_index.index].image_description)
+        self.image_slider.set_val(index + 1)
         self.fig.canvas.flush_events()
         plt.draw()
 
